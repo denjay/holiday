@@ -1,14 +1,24 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, screen, Menu, Tray, Notification } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { default as AutoLaunch } from 'auto-launch'
+import { attach, detach /* , refresh */ } from 'electron-as-wallpaper'
 import icon from '../../resources/icon.png?asset'
 
 function createWindow(): void {
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: 230,
+    height: 200,
+    x: width - 240,
+    y: height - 210,
+    alwaysOnTop: !app.isPackaged,
+    resizable: false,
     show: false,
+    frame: false,
+    transparent: true,
+    type: 'toolbar', // 不显示任务栏窗口
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
@@ -19,6 +29,64 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
+    if (app.isPackaged) attach(mainWindow)
+  })
+
+  mainWindow.on('close', () => {
+    detach(mainWindow)
+  })
+
+  async function setContextMenu(tray: Tray) {
+    const minecraftAutoLauncher = new AutoLaunch({ name: 'holiday' })
+    const template = [
+      {
+        label: '刷新',
+        click: () => {
+          mainWindow.webContents.send('update')
+        }
+      },
+      {
+        label: '退出',
+        click: () => {
+          mainWindow.close()
+        }
+      }
+    ]
+    if (app.isPackaged) {
+      const isEnabled: boolean = await minecraftAutoLauncher.isEnabled()
+      if (isEnabled) {
+        template.unshift({
+          label: '取消开机启动',
+          click: () => {
+            minecraftAutoLauncher.disable()
+            setContextMenu(tray)
+          }
+        })
+      } else {
+        template.unshift({
+          label: '开机启动',
+          click: () => {
+            minecraftAutoLauncher.enable()
+            setContextMenu(tray)
+          }
+        })
+      }
+    }
+    const contextMenu = Menu.buildFromTemplate(template)
+    tray.setContextMenu(contextMenu)
+  }
+
+  // 创建托盘图标
+  const tray = new Tray(icon)
+  tray.setToolTip('假期倒计时')
+  setContextMenu(tray)
+  tray.on('click', function () {
+    if (Notification.isSupported() && globalThis.message) {
+      new Notification({ title: '假期提醒', body: globalThis.message }).show()
+    }
+  })
+  tray.on('right-click', function () {
+    tray.popUpContextMenu()
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -49,8 +117,9 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
+  ipcMain.on('message', (_, message) => {
+    globalThis.message = message
+  })
 
   createWindow()
 
