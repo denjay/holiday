@@ -6,20 +6,26 @@ interface Holiday {
   name: string
   date: string
 }
+
 interface HolidayGroupBy {
   name: string
   rest: number
   date: string[]
 }
 
+const tts = ref('')
+const holidayObjArr = reactive<HolidayGroupBy[]>([])
+
+getTTS()
+getHolidayData()
+scheduledUpdate()
+
 window.api.onUpdate(() => {
-  getTts()
+  getTTS()
   getHolidayData()
 })
 
-const tts = ref('')
-getTts()
-async function getTts() {
+async function getTTS() {
   await fetch('https://timor.tech/api/holiday/tts/')
     .then((res) => res.json())
     .then((datas) => {
@@ -32,8 +38,6 @@ async function getTts() {
     })
 }
 
-const holidayObjArr = reactive<HolidayGroupBy[]>([])
-getHolidayData()
 async function getHolidayData() {
   const year = new Date().getFullYear()
   const month = new Date().getMonth() + 1
@@ -56,7 +60,7 @@ async function fetchHolidayData(year: number, today: string) {
         const rest = Math.ceil(
           (new Date(`${year}-01-01`).getTime() - new Date().getTime()) / (24 * 60 * 60 * 1000)
         )
-        result.push({ name: '元旦', rest, date: [`${year}-01-01`] })
+        result.push({ name: '元旦', rest, date: [] })
       } else {
         let holidayGroupBy: HolidayGroupBy = { name: '', rest: 0, date: [] as string[] }
         void (Object.values(holiday) as Holiday[])
@@ -78,6 +82,29 @@ async function fetchHolidayData(year: number, today: string) {
     })
   return result
 }
+
+// 第二天定时更新
+function scheduledUpdate() {
+  const year = new Date().getFullYear()
+  const month = new Date().getMonth() + 1
+  const day = new Date().getDate()
+  const tomorrow = `${year}-${month}-${day + 1}`
+  const deltaTime = new Date(tomorrow).getTime() - new Date().getTime()
+  setTimeout(
+    () => {
+      getTTS()
+      getHolidayData()
+      scheduledUpdate()
+    },
+    deltaTime + 1000 * 60
+  )
+}
+
+function alert(name: string, date: string[]) {
+  if (date.length) {
+    window.alert(`${name}放${date.length}天假，从${date[0]}到${date[date.length - 1]}`)
+  }
+}
 </script>
 
 <template>
@@ -86,9 +113,9 @@ async function fetchHolidayData(year: number, today: string) {
     <div>{{ tts }}</div>
     <hr />
     <div v-if="holidayObjArr.length === 0" id="empty">无数据</div>
-    <div v-for="({ name, rest }, index) in holidayObjArr" v-else :key="index">
+    <div v-for="({ name, rest, date }, index) in holidayObjArr" v-else :key="index">
       <p class="holiday-item">
-        🔥 距【<span class="holiday-name">{{ name }}</span
+        🔥 距【<span class="holiday-name" @click="alert(name, date)">{{ name }}</span
         >】还有 <span class="holiday-rest">{{ rest }}</span> 天
       </p>
     </div>
@@ -104,7 +131,7 @@ async function fetchHolidayData(year: number, today: string) {
   background-color: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10px);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-  padding: 5px;
+  padding: 8px 15px;
   margin: 10px;
   font-size: 13px;
 }
@@ -121,7 +148,7 @@ async function fetchHolidayData(year: number, today: string) {
 hr {
   border: none;
   border-top: 1px dotted #00aa91;
-  width: 90%;
+  width: 100%;
   margin: 5px 0 -5px 0;
 }
 

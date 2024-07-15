@@ -12,7 +12,7 @@ import {
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { default as AutoLaunch } from 'auto-launch'
-import { attach, detach /* , refresh */ } from 'electron-as-wallpaper'
+import { attach, refresh } from 'electron-as-wallpaper'
 import icon from '../../resources/icon.png?asset'
 
 function createWindow(): void {
@@ -27,6 +27,7 @@ function createWindow(): void {
     resizable: false,
     show: false,
     frame: false,
+    focusable: false,
     transparent: true,
     type: 'toolbar', // 不显示任务栏窗口
     autoHideMenuBar: true,
@@ -39,11 +40,15 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
-    if (app.isPackaged) attach(mainWindow)
+    attach(mainWindow, {
+      transparent: true,
+      // forwardKeyboardInput: true,
+      forwardMouseInput: true
+    })
   })
 
   mainWindow.on('close', () => {
-    detach(mainWindow)
+    console.log('close')
   })
 
   powerMonitor.on('resume', () => {
@@ -149,6 +154,7 @@ app.whenReady().then(() => {
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
+    refresh()
     app.quit()
   }
 })
