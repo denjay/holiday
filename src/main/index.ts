@@ -1,4 +1,14 @@
-import { app, shell, BrowserWindow, ipcMain, screen, Menu, Tray, Notification } from 'electron'
+import {
+  app,
+  shell,
+  BrowserWindow,
+  ipcMain,
+  screen,
+  Menu,
+  Tray,
+  Notification,
+  powerMonitor
+} from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { default as AutoLaunch } from 'auto-launch'
@@ -9,10 +19,10 @@ function createWindow(): void {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 230,
-    height: 200,
-    x: width - 240,
-    y: height - 210,
+    width: 240,
+    height: 240,
+    x: width - 250,
+    y: height - 250,
     alwaysOnTop: !app.isPackaged,
     resizable: false,
     show: false,
@@ -34,6 +44,10 @@ function createWindow(): void {
 
   mainWindow.on('close', () => {
     detach(mainWindow)
+  })
+
+  powerMonitor.on('resume', () => {
+    mainWindow.webContents.send('update')
   })
 
   async function setContextMenu(tray: Tray) {
@@ -108,7 +122,7 @@ function createWindow(): void {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   // Set app user model id for windows
-  electronApp.setAppUserModelId('com.electron')
+  electronApp.setAppUserModelId('Holiday')
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.

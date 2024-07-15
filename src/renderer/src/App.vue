@@ -12,7 +12,7 @@ interface HolidayGroupBy {
   date: string[]
 }
 
-window.api.onUpdate(async () => {
+window.api.onUpdate(() => {
   getTts()
   getHolidayData()
 })
@@ -20,10 +20,14 @@ window.api.onUpdate(async () => {
 const tts = ref('')
 getTts()
 async function getTts() {
-  await fetch('https://timor.tech/api/holiday/tts')
+  await fetch('https://timor.tech/api/holiday/tts/')
     .then((res) => res.json())
     .then((datas) => {
       tts.value = datas.tts
+    })
+  await fetch('https://timor.tech/api/holiday/tts/next/')
+    .then((res) => res.json())
+    .then((datas) => {
       window.electron.ipcRenderer.send('message', datas.tts)
     })
 }
@@ -97,30 +101,35 @@ async function fetchHolidayData(year: number, today: string) {
   flex-direction: column;
   align-items: center;
   border-radius: 10px;
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10px);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   padding: 5px;
   margin: 10px;
   font-size: 13px;
 }
+
 #title {
   font-size: 18px;
   font-weight: bold;
 }
+
 #empty {
   margin: 10px;
 }
+
 hr {
   border: none;
   border-top: 1px dotted #00aa91;
   width: 90%;
   margin: 5px 0 -5px 0;
 }
+
 .holiday-item .holiday-name {
   font-weight: bold;
   color: #00aa91;
 }
+
 .holiday-item .holiday-rest {
   font-size: 25px;
   color: #00aa91;
