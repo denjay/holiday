@@ -5,6 +5,8 @@ declare global {
     electron: ElectronAPI
     api: {
       onUpdate: (callback: (event) => void) => void
+      onToggleHoliday: (callback: (event) => void) => void
+      onToggleAnimation: (callback: (event) => void) => void
     }
   }
 }

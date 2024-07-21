@@ -39,7 +39,9 @@ function createWindow(): void {
   })
 
   // 设置鼠标穿透
-  mainWindow.setIgnoreMouseEvents(true)
+  if (!app.isPackaged) {
+    mainWindow.setIgnoreMouseEvents(true)
+  }
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
@@ -62,7 +64,19 @@ function createWindow(): void {
     const minecraftAutoLauncher = new AutoLaunch({ name: 'holiday' })
     const template = [
       {
-        label: '刷新',
+        label: '显示/隐藏假期',
+        click: () => {
+          mainWindow.webContents.send('toggleHoliday')
+        }
+      },
+      {
+        label: '显示/隐藏动画',
+        click: () => {
+          mainWindow.webContents.send('toggleAnimation')
+        }
+      },
+      {
+        label: '刷新数据',
         click: () => {
           mainWindow.webContents.send('update')
         }

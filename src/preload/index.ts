@@ -4,7 +4,11 @@ import { electronAPI } from '@electron-toolkit/preload'
 // Custom APIs for renderer
 const api = {
   onUpdate: (callback: (event: Electron.IpcRendererEvent) => void) =>
-    ipcRenderer.on('update', callback)
+    ipcRenderer.on('update', callback),
+  onToggleHoliday: (callback: (event: Electron.IpcRendererEvent) => void) =>
+    ipcRenderer.on('toggleHoliday', callback),
+  onToggleAnimation: (callback: (event: Electron.IpcRendererEvent) => void) =>
+    ipcRenderer.on('toggleAnimation', callback)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

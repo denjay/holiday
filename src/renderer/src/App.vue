@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref /*, onMounted, watch, computed, nextTick, toRaw */ } from 'vue'
+import { reactive, ref } from 'vue'
 import DataCloudsRain from './components/DataCloudsRain.vue'
 
 interface Holiday {
@@ -16,6 +16,8 @@ interface HolidayGroupBy {
 
 const tts = ref('')
 const holidayObjArr = reactive<HolidayGroupBy[]>([])
+const holidayVisible = ref(true)
+const animationVisible = ref(true)
 
 getTTS()
 getHolidayData()
@@ -24,6 +26,12 @@ scheduledUpdate()
 window.api.onUpdate(() => {
   getTTS()
   getHolidayData()
+})
+window.api.onToggleHoliday(() => {
+  holidayVisible.value = !holidayVisible.value
+})
+window.api.onToggleAnimation(() => {
+  animationVisible.value = !animationVisible.value
 })
 
 async function getTTS() {
@@ -110,8 +118,8 @@ function alert(name: string, date: string[]) {
 
 <template>
   <div id="container">
-    <DataCloudsRain></DataCloudsRain>
-    <div id="holiday">
+    <DataCloudsRain v-if="animationVisible"></DataCloudsRain>
+    <div v-if="holidayVisible" id="holiday">
       <p id="title">🌟 假日倒计时 🌟</p>
       <div>{{ tts }}</div>
       <hr />
