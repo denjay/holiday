@@ -19,10 +19,10 @@ function createWindow(): void {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 240,
-    height: 240,
-    x: width - 250,
-    y: height - 250,
+    width,
+    height,
+    x: 0,
+    y: 0,
     alwaysOnTop: !app.isPackaged,
     resizable: false,
     show: false,
@@ -37,6 +37,9 @@ function createWindow(): void {
       sandbox: false
     }
   })
+
+  // 设置鼠标穿透
+  mainWindow.setIgnoreMouseEvents(true)
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()

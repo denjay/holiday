@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { reactive, ref /*, onMounted, watch, computed, nextTick, toRaw */ } from 'vue'
+import DataCloudsRain from './components/DataCloudsRain.vue'
 
 interface Holiday {
   holiday: boolean
@@ -108,29 +109,40 @@ function alert(name: string, date: string[]) {
 </script>
 
 <template>
-  <div id="app">
-    <p id="title">🌟 假日倒计时 🌟</p>
-    <div>{{ tts }}</div>
-    <hr />
-    <div v-if="holidayObjArr.length === 0" id="empty">无数据</div>
-    <div v-for="({ name, rest, date }, index) in holidayObjArr" v-else :key="index">
-      <p class="holiday-item">
-        🔥 距【<span class="holiday-name" @click="alert(name, date)">{{ name }}</span
-        >】还有 <span class="holiday-rest">{{ rest }}</span> 天
-      </p>
+  <div id="container">
+    <DataCloudsRain></DataCloudsRain>
+    <div id="holiday">
+      <p id="title">🌟 假日倒计时 🌟</p>
+      <div>{{ tts }}</div>
+      <hr />
+      <div v-if="holidayObjArr.length === 0" id="empty">无数据</div>
+      <div v-for="({ name, rest, date }, index) in holidayObjArr" v-else :key="index">
+        <p class="holiday-item">
+          🔥 距【<span class="holiday-name" @click="alert(name, date)">{{ name }}</span
+          >】还有 <span class="holiday-rest">{{ rest }}</span> 天
+        </p>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-#app {
+#container {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+}
+#holiday {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 210px;
   display: flex;
   flex-direction: column;
   align-items: center;
   border-radius: 10px;
-  background-color: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
   padding: 8px 15px;
   margin: 10px;
   font-size: 13px;
@@ -147,18 +159,19 @@ function alert(name: string, date: string[]) {
 
 hr {
   border: none;
-  border-top: 1px dotted #00aa91;
+  border-top: 1px dotted #8a45a3;
   width: 100%;
   margin: 5px 0 -5px 0;
 }
 
 .holiday-item .holiday-name {
   font-weight: bold;
-  color: #00aa91;
+  color: #8a45a3;
 }
 
 .holiday-item .holiday-rest {
   font-size: 25px;
-  color: #00aa91;
+  color: #8a45a3;
+  font-weight: bold;
 }
 </style>
